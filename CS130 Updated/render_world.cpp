@@ -29,7 +29,7 @@ Render_World::~Render_World()
 Hit Render_World::Closest_Intersection(const Ray& ray)
 {
     //Set min_t to a large int value
-    int min_t = std::numeric_limits<int>::max();
+    double min_t = std::numeric_limits<double>::max();
     
     //Initialize empty Hit object
     Hit closest = {NULL, 0, 0};
