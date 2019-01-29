@@ -17,14 +17,15 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
     const vec3& normal,int recursion_depth) const
 {
     vec3 color;
-    TODO; //determine the color
+    //determine the color
 
     //Add ambient component
     vec3 Iambient = world.ambient_intensity * world.ambient_color * this->color_ambient;
 
     for(unsigned i = 0; i < world.lights.size(); i++){
-        
-        Ray shadow_ray(intersection_point, (world.lights.at(i)->position - intersection_point));   // shadow_ray points from intersection point towards light
+        vec3 ray_dir = (world.lights.at(i)->position - intersection_point);
+
+        Ray shadow_ray(intersection_point, ray_dir);   // shadow_ray points from intersection point towards light
 
         double maxDistance = (world.lights.at(i)->position - intersection_point).magnitude();    // max Ray's intersection distance, t
 
@@ -32,20 +33,21 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
         Hit tempHit = world.Closest_Intersection(shadow_ray); // Finding closest intersection of shadow_ray
 
 
-        if(tempHit.object != NULL && (tempHit.dist != 0 || tempHit.dist > maxDistance)){    // If shadow_ray doesn't intersect any object between initial point and light
-            //Compute diffuse and specular
+        if(tempHit.object == NULL && (tempHit.dist != 0  || tempHit.dist > maxDistance)){    // If shadow_ray doesn't intersect any object between initial point and light
+    										            //Compute diffuse and specular
             
 	    double Idiffprod = dot(normal, shadow_ray.direction.normalized());
 	    
-            vec3 Idiffuse = world.lights.at(i)->Emitted_Light(shadow_ray.direction) * max(Idiffprod, 0);
+            vec3 Idiffuse = world.lights.at(i)->Emitted_Light(ray_dir) * max(Idiffprod, 0);
             
 
-            vec3 v = -ray.direction.normalized();
+            vec3 v = -ray.direction;
             vec3 r = v - 2 * dot(v, normal) * normal;
 
-            vec3 Ispecular = world.lights.at(i)->Emitted_Light(shadow_ray.direction) * max(dot(v, r), 0); 
+            vec3 Ispecular = world.lights.at(i)->Emitted_Light(ray_dir) * max(dot(v, r), 0); 
 
-            color += Idiffuse + Ispecular;
+            color += Idiffuse; 
+	    color += Ispecular;
             
         }
 
