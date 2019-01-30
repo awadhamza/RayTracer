@@ -4,6 +4,10 @@
 #include "render_world.h"
 #include "object.h"
 #include <algorithm>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
 
 
 double max(double a, double b){
@@ -33,21 +37,23 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
         Hit tempHit = world.Closest_Intersection(shadow_ray); // Finding closest intersection of shadow_ray
 
 
-        if(tempHit.object == NULL && (tempHit.dist != 0  || tempHit.dist > maxDistance)){    // If shadow_ray doesn't intersect any object between initial point and light
+        if(tempHit.object == NULL || tempHit.dist < small_t  || tempHit.dist > maxDistance){    // If shadow_ray doesn't intersect any object between initial point and light
     										            //Compute diffuse and specular
             
-	    double Idiffprod = dot(normal, shadow_ray.direction.normalized());
+			double Idiffprod = dot(normal, shadow_ray.direction);
 	    
-            vec3 Idiffuse = world.lights.at(i)->Emitted_Light(ray_dir) * max(Idiffprod, 0);
-            
+            vec3 Idiffuse = this->color_diffuse * world.lights.at(i)->Emitted_Light(ray_dir) * max(Idiffprod, 0);
+            if(debug_pixel){
+				cout << Idiffuse << endl;
+			}
 
-            vec3 v = -ray.direction;
-            vec3 r = v - 2 * dot(v, normal) * normal;
+            vec3 v = ray.direction;
+            vec3 r = v - (2 * dot(v, normal) * normal);
 
-            vec3 Ispecular = world.lights.at(i)->Emitted_Light(ray_dir) * max(dot(v, r), 0); 
+            vec3 Ispecular = this->color_specular * world.lights.at(i)->Emitted_Light(ray_dir) * pow(max(dot(-v, r), 0), specular_power); 
 
             color += Idiffuse; 
-	    color += Ispecular;
+			color += Ispecular;
             
         }
 
