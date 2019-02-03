@@ -48,7 +48,7 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
 			}
 
             vec3 v = ray.direction;
-            vec3 r = v - (2 * dot(v, normal) * normal);
+            vec3 r = (intersection_point - world.lights.at(i)->position).normalized() - (2 * dot((intersection_point - world.lights.at(i)->position).normalized(), normal) * normal);
 
             vec3 Ispecular = this->color_specular * world.lights.at(i)->Emitted_Light(ray_dir) * pow(max(dot(-v, r), 0), specular_power); 
 
@@ -60,7 +60,7 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
         
 
     }
-    
+
     color += Iambient;
 
     return color;
