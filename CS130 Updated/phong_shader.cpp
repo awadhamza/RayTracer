@@ -36,30 +36,32 @@ Shade_Surface(const Ray& ray,const vec3& intersection_point,
         
         Hit tempHit = world.Closest_Intersection(shadow_ray); // Finding closest intersection of shadow_ray
 
-
-        if(tempHit.object == NULL || tempHit.dist < small_t  || tempHit.dist > maxDistance){    // If shadow_ray doesn't intersect any object between initial point and light
+	if(world.enable_shadows == false || (world.enable_shadows == true && (tempHit.dist > maxDistance || tempHit.dist < small_t || tempHit.object == NULL))){
+            if(tempHit.object == NULL || tempHit.dist < small_t  || tempHit.dist > maxDistance){    // If shadow_ray doesn't intersect any object between initial point and light
     										            //Compute diffuse and specular
             
-			double Idiffprod = dot(normal, shadow_ray.direction);
+		double Idiffprod = dot(normal, shadow_ray.direction);
 	    
-            vec3 Idiffuse = this->color_diffuse * world.lights.at(i)->Emitted_Light(ray_dir) * max(Idiffprod, 0);
-            if(debug_pixel){
-				cout << Idiffuse << endl;
-			}
+                vec3 Idiffuse = this->color_diffuse * world.lights.at(i)->Emitted_Light(ray_dir) * max(Idiffprod, 0);
+                //if(debug_pixel){
+		//		cout << Idiffuse << endl;
+		//	}
 
-            vec3 v = ray.direction;
-            vec3 r = (intersection_point - world.lights.at(i)->position).normalized() - (2 * dot((intersection_point - world.lights.at(i)->position).normalized(), normal) * normal);
+                vec3 v = ray.direction;
+                vec3 r = (intersection_point - world.lights.at(i)->position).normalized() - (2 * dot((intersection_point - world.lights.at(i)->position).normalized(), normal) * normal);
 
-            vec3 Ispecular = this->color_specular * world.lights.at(i)->Emitted_Light(ray_dir) * pow(max(dot(-v, r), 0), specular_power); 
+                vec3 Ispecular = this->color_specular * world.lights.at(i)->Emitted_Light(ray_dir) * pow(max(dot(-v, r), 0), specular_power); 
 
-            color += Idiffuse; 
-			color += Ispecular;
+                color += Idiffuse; 
+		color += Ispecular;
             
-        }
+            }
+	}
 
         
 
     }
+
 
     color += Iambient;
 
